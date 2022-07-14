@@ -1,25 +1,23 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
-
+import { Button, ChakraProvider, Flex, useDisclosure } from "@chakra-ui/react";
+import DashBoard from "./components/dashboard";
+import Sidebar from "./components/sidebar.component";
+import { theme } from "./utils/theme";
+import { HamburgerIcon } from "@chakra-ui/icons";
+import { useRef } from "react";
 function App() {
+  const { isOpen, onOpen, onClose } = useDisclosure({ defaultIsOpen: true });
+  const sidebarRef = useRef<HTMLDivElement>(null);
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ChakraProvider theme={theme}>
+      <Flex>
+        <Sidebar ref={sidebarRef} onClose={onClose} isOpen={isOpen} />
+        <DashBoard sidebarRef={sidebarRef} isSidebarOpen={isOpen}>
+          <Button onClick={onOpen} display={isOpen ? "none" : "block"}>
+            <HamburgerIcon />
+          </Button>
+        </DashBoard>
+      </Flex>
+    </ChakraProvider>
   );
 }
 
