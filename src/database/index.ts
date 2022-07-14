@@ -1,11 +1,10 @@
 import Dexie, { Table } from "dexie";
 
 export interface IMovie {
-  id: number;
-  title: string;
-  description: string;
+  id?: number;
+  remark: string;
   date: string;
-  path: string;
+  content: string;
 }
 
 export class MovieDatabase extends Dexie {
@@ -14,7 +13,7 @@ export class MovieDatabase extends Dexie {
   constructor() {
     super("MoviesDatabase");
     this.version(1).stores({
-      movies: "++id,title,description,date,path",
+      movies: "++id,remark,date,content",
     });
   }
 }
