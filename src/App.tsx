@@ -8,7 +8,7 @@ import { getLastMovie } from "./database/utils";
 import { theme } from "./utils/theme";
 function App() {
   const { isOpen, onOpen, onClose } = useDisclosure({ defaultIsOpen: true });
-  const [currentMovie, setCurrentMovie] = useState<IMovie | null>(null);
+  const [currentMovie, setCurrentMovie] = useState<IMovie | undefined>();
 
   useEffect(() => {
     // get most last movie
@@ -21,8 +21,18 @@ function App() {
   return (
     <ChakraProvider theme={theme}>
       <Flex height="100vh">
-        <Sidebar ref={sidebarRef} onClose={onClose} isOpen={isOpen} />
-        <Dashboard sidebarRef={sidebarRef} isSidebarOpen={isOpen}>
+        <Sidebar
+          ref={sidebarRef}
+          onClose={onClose}
+          isOpen={isOpen}
+          setCurrentMovie={setCurrentMovie}
+        />
+        <Dashboard
+          sidebarRef={sidebarRef}
+          isSidebarOpen={isOpen}
+          setCurrentMovie={setCurrentMovie}
+          currentMovie={currentMovie}
+        >
           <Button onClick={onOpen} display={isOpen ? "none" : "block"}>
             <HamburgerIcon />
           </Button>

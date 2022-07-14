@@ -1,7 +1,11 @@
 import { database, IMovie } from ".";
 
 export const addMovie = async (movie: IMovie) => {
-  await database.movies.add(movie);
+  return await database.movies.add(movie);
+};
+
+export const updateMovie = async (movie: IMovie) => {
+  return await database.movies.update(movie.id!, movie);
 };
 
 export const getLastMovie = async () => {
@@ -31,8 +35,13 @@ export const getPageOfMovies = async (page: number, n: number) => {
   const movies = await database.movies
     .orderBy("id")
     .reverse()
-    .offset(page * n)
+    .offset((page - 1) * n)
     .limit(n)
     .toArray();
   return movies;
+};
+
+export const getAllMoviesCount = async () => {
+  const count = await database.movies.count();
+  return count;
 };

@@ -4,6 +4,7 @@ import {
   ButtonGroup,
   FormControl,
   FormErrorMessage,
+  FormHelperText,
   FormLabel,
   IconButton,
   Input,
@@ -22,14 +23,20 @@ import {
   CreateMovieDto,
   createMovieSchema,
 } from "../../validations/create-new-movie.schema";
-import { database } from "../../database";
+import { database, IMovie } from "../../database";
 interface MovieFormProps {
   onClose: () => void;
+  setCurrentMovie: React.Dispatch<React.SetStateAction<IMovie | undefined>>;
+  refetchMovies: (fresh?: boolean) => void;
 }
 
-const MovieForm: FC<MovieFormProps> = ({ onClose }) => {
-  const { register, formState, handleSubmit } = useForm<CreateMovieDto>({
-    mode: "onTouched",
+const MovieForm: FC<MovieFormProps> = ({
+  onClose,
+  setCurrentMovie,
+  refetchMovies,
+}) => {
+  const { register, formState, handleSubmit, reset } = useForm<CreateMovieDto>({
+    mode: "onChange",
     resolver: yupResolver(createMovieSchema),
   });
 
@@ -40,17 +47,31 @@ const MovieForm: FC<MovieFormProps> = ({ onClose }) => {
       date: new Date().toDateString(),
     });
 
-    console.log(id);
+    const movie = await database.movies.get(id);
+    setCurrentMovie(movie);
+
+    refetchMovies(true);
+    reset();
+    onClose();
   };
 
   return (
     <Stack spacing={4} as="form" onSubmit={handleSubmit(onSubmit)}>
-      <FormControl>
+      <FormControl isInvalid={!!formState.errors["remark"]}>
         <FormLabel>Create New</FormLabel>
-        <Input placeholder="Enter Remarks" {...register("remark")} />
+        <Input
+          placeholder="Enter Remarks"
+          {...register("remark")}
+          autoComplete="off"
+          colorScheme="green"
+        />
         <FormErrorMessage>
-          {formState.errors["remark"] && formState.errors["remark"].message}
+          {!!formState.errors["remark"] && formState.errors["remark"].message}
         </FormErrorMessage>
+        <FormHelperText>
+          {!formState.errors["remark"] &&
+            "Remark helps you to remember the movie."}
+        </FormHelperText>
       </FormControl>
       <ButtonGroup display="flex" justifyContent="flex-end">
         <Button variant="outline" onClick={onClose}>
@@ -64,7 +85,14 @@ const MovieForm: FC<MovieFormProps> = ({ onClose }) => {
   );
 };
 
-const CreateNewMoviePopover = () => {
+interface CreateNewMoviePopoverProps {
+  setCurrentMovie: React.Dispatch<React.SetStateAction<IMovie | undefined>>;
+  refetchMovies: () => void;
+}
+const CreateNewMoviePopover: FC<CreateNewMoviePopoverProps> = ({
+  setCurrentMovie,
+  refetchMovies,
+}) => {
   const { onOpen, onClose, isOpen } = useDisclosure();
   return (
     <Popover
@@ -80,7 +108,11 @@ const CreateNewMoviePopover = () => {
       <PopoverContent p={5}>
         <PopoverArrow />
         <PopoverCloseButton />
-        <MovieForm onClose={onClose} />
+        <MovieForm
+          onClose={onClose}
+          setCurrentMovie={setCurrentMovie}
+          refetchMovies={refetchMovies}
+        />
       </PopoverContent>
     </Popover>
   );

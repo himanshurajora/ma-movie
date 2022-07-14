@@ -1,15 +1,20 @@
-import { Flex, HStack, Text, VStack } from "@chakra-ui/react";
+import { HStack, Text, VStack } from "@chakra-ui/react";
 import { FC, PropsWithChildren } from "react";
+import { IMovie } from "../database";
 import MovieEditor from "./movie-editor";
 
 interface IDashboardProps {
   isSidebarOpen: boolean;
   sidebarRef: React.RefObject<HTMLDivElement>;
+  currentMovie: IMovie | undefined;
+  setCurrentMovie: React.Dispatch<React.SetStateAction<IMovie | undefined>>;
 }
 const Dashboard: FC<PropsWithChildren<IDashboardProps>> = ({
   isSidebarOpen,
   sidebarRef,
   children,
+  setCurrentMovie,
+  currentMovie,
 }) => {
   return (
     <VStack
@@ -22,9 +27,16 @@ const Dashboard: FC<PropsWithChildren<IDashboardProps>> = ({
     >
       <HStack>
         {children}
-        <Text size="xl">Some File Remark - {new Date().toDateString()}</Text>
+        <Text size="xl">
+          {!!currentMovie?.remark && currentMovie.remark}
+          &nbsp;&nbsp;
+          {!!currentMovie?.date && currentMovie.date}
+        </Text>
       </HStack>
-      <MovieEditor />
+      <MovieEditor
+        currentMovie={currentMovie}
+        setCurrentMovie={setCurrentMovie}
+      />
     </VStack>
   );
 };
