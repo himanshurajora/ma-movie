@@ -7,15 +7,24 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerOverlay,
+  Flex,
   Input,
+  Menu,
+  MenuItem,
+  MenuList,
   Spacer,
   Text,
+  useOutsideClick,
   useToast,
   VStack,
 } from "@chakra-ui/react";
 import { FC, useEffect, useRef, useState } from "react";
 import { IMovie } from "../database";
-import { getAllMoviesCount, getPageOfMovies } from "../database/utils";
+import {
+  deleteMovieByID,
+  getAllMoviesCount,
+  getPageOfMovies,
+} from "../database/utils";
 import CreateNewMoviePopover from "./forms/create-new-movie";
 
 interface SidebarProps {
@@ -31,6 +40,16 @@ const Sidebar: FC<SidebarProps> = ({ isOpen, onClose, setCurrentMovie }) => {
   const [movies, setMovies] = useState<IMovie[]>([]);
   const movieCount = useRef(0);
   const toaster = useToast();
+  const [currentXY, setCurrentXY] = useState<number[]>([0, 0]);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<number>();
+  const menuRef = useRef<HTMLDivElement>(null);
+  useOutsideClick({
+    ref: menuRef,
+    handler: () => {
+      setIsMenuOpen(false);
+    },
+  });
 
   const refetchMovies = (fresh: boolean = false) => {
     if (!fresh) {
@@ -76,6 +95,14 @@ const Sidebar: FC<SidebarProps> = ({ isOpen, onClose, setCurrentMovie }) => {
     }
   }, [movies]);
 
+  const handleDeleteMovie = async () => {
+    if (itemToDelete) {
+      await deleteMovieByID(itemToDelete);
+      refetchMovies(true);
+      setIsMenuOpen(false);
+    }
+  };
+
   return (
     <Drawer isOpen={isOpen} placement="left" onClose={onClose}>
       <DrawerOverlay />
@@ -100,19 +127,23 @@ const Sidebar: FC<SidebarProps> = ({ isOpen, onClose, setCurrentMovie }) => {
           <VStack alignItems="start">
             {movies.map((movie, index) => (
               <Button
-                key={index}
+                key={movie.id}
                 onClick={() => {
                   setCurrentMovie(movie);
                 }}
                 width="full"
                 justifyContent="start"
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  setCurrentXY([e.clientX, e.clientY]);
+                  setIsMenuOpen(true);
+                  setItemToDelete(movie.id);
+                }}
               >
-                <Text>
-                  {movie.remark.length > 15
-                    ? movie.remark.slice(0, 15) + "..."
-                    : movie.remark}{" "}
-                  <Text as="sup">{movie.date}</Text>
-                </Text>
+                {movie.remark.length > 15
+                  ? movie.remark.slice(0, 15) + "..."
+                  : movie.remark}{" "}
+                <Text as="sup">{movie.date}</Text>
               </Button>
             ))}
             <Spacer height="4" />
@@ -128,6 +159,24 @@ const Sidebar: FC<SidebarProps> = ({ isOpen, onClose, setCurrentMovie }) => {
               </Button>
             )}
           </VStack>
+          <Flex
+            ref={menuRef}
+            position="absolute"
+            top={`${currentXY[1]}px`}
+            left={`${currentXY[0]}px`}
+          >
+            <Menu isOpen={isMenuOpen}>
+              <MenuList>
+                <MenuItem
+                  onClick={() => {
+                    handleDeleteMovie();
+                  }}
+                >
+                  Delete
+                </MenuItem>
+              </MenuList>
+            </Menu>
+          </Flex>
         </DrawerBody>
         <DrawerFooter>
           <Text>💻 Made By Vedik Devs</Text>

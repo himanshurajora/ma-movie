@@ -45,3 +45,7 @@ export const getAllMoviesCount = async () => {
   const count = await database.movies.count();
   return count;
 };
+
+export const deleteMovieByID = async (id: number) => {
+  const movie = await database.movies.delete(id);
+};

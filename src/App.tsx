@@ -20,7 +20,12 @@ function App() {
   const sidebarRef = useRef<HTMLDivElement>(null);
   return (
     <ChakraProvider theme={theme}>
-      <Flex height="100vh">
+      <Flex
+        height="100vh"
+        onContextMenu={(e) => {
+          e.preventDefault();
+        }}
+      >
         <Sidebar
           ref={sidebarRef}
           onClose={onClose}
