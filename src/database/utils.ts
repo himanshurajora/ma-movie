@@ -32,13 +32,21 @@ export const getMovieById = async (id: number) => {
 };
 
 export const getPageOfMovies = async (page: number, n: number) => {
+  // TODO: Learn Dexie Where clause
+
   const movies = await database.movies
     .orderBy("id")
     .reverse()
     .offset((page - 1) * n)
     .limit(n)
     .toArray();
+
   return movies;
+
+  // later filter using database for soft deleted
+  // return movies.filter((movie) => {
+  //   return movie.deletedAt === null || movie.deletedAt === undefined;
+  // });
 };
 
 export const getAllMoviesCount = async () => {
@@ -47,5 +55,13 @@ export const getAllMoviesCount = async () => {
 };
 
 export const deleteMovieByID = async (id: number) => {
-  const movie = await database.movies.delete(id);
+  // implement soft delete
+  // const movie = await database.movies.get(id);
+  // if (movie) {
+  //   movie.deletedAt = new Date().toISOString();
+  //   await database.movies.put(movie);
+  // }
+
+  // hard delete
+  await database.movies.delete(id);
 };

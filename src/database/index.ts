@@ -5,6 +5,7 @@ export interface IMovie {
   remark: string;
   date: string;
   content: string;
+  deletedAt?: string | null;
 }
 
 export class MovieDatabase extends Dexie {
@@ -13,7 +14,7 @@ export class MovieDatabase extends Dexie {
   constructor() {
     super("MoviesDatabase");
     this.version(1).stores({
-      movies: "++id,remark,date,content",
+      movies: "++id,remark,date,content, deletedAt",
     });
   }
 }
